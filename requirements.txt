@@ -1,0 +1,9 @@
+openai
+langchain>=0.0.315
+streamlit
+anthropic
+pydantic<2
+langchain-community
+streamlit-chat
+streamlit_js_eval
+langchain-community
