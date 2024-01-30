@@ -8,3 +8,4 @@ streamlit-chat
 streamlit_js_eval
 langchain-community
 langchain-openai
+loguru
