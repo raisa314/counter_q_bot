@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from langchain_openai import ChatOpenAI
 from loguru import logger
 from langchain_openai import OpenAIEmbeddings
@@ -14,7 +15,7 @@ import pdfplumber
 from streamlit_js_eval import streamlit_js_eval
 
 config = dotenv_values(".env")
-api_key = config["OPENAI_API_KEY"]
+# api_key = config["OPENAI_API_KEY"]
 
 class App:
     def show_sidebar(self):
@@ -35,6 +36,26 @@ class App:
                 except Exception as e:
                     st.error(f"Error reading PDF: {e}")
         return reset_button
+    
+    def load_key(self):
+        if not hasattr(st.session_state, "api_key"):
+            st.session_state.api_key = None
+        #you can define your API key in .env directly
+        if os.path.exists(".env") and os.environ.get("OPENAI_API_KEY") is not None:
+            user_api_key = os.environ["OPENAI_API_KEY"]
+            st.sidebar.success("API key loaded from .env")
+        else:
+            if st.session_state.api_key is not None:
+                user_api_key = st.session_state.api_key
+                st.sidebar.success("API key loaded from previous input")
+            else:
+                user_api_key = st.sidebar.text_input(
+                    label="#### Your OpenAI API key 👇", placeholder="sk-...", type="password"
+                )
+                if user_api_key:
+                    st.session_state.api_key = user_api_key
+
+        return user_api_key
 
     def display_chat_history(self, current_user_input=None, current_bot_response=None):
         """Displays the chat history along with the current user input and bot response.""" 
@@ -73,7 +94,8 @@ class App:
         
         if "messages" not in st.session_state:
             st.session_state["messages"] = []
-
+        api_key = self.load_key()
+        
         self.embeddings = OpenAIEmbeddings(openai_api_key= api_key)
         self.model = ChatOpenAI(model="gpt-3.5-turbo-16k", openai_api_key= api_key)
 
